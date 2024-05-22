@@ -7,6 +7,8 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/string_view.h"
 
+
+
 namespace googlebot {
 // The kUnsupportedTags tags are popular tags in robots.txt files, but Google
 // doesn't use them for anything. Other search engines may, however, so we
@@ -48,6 +50,7 @@ void RobotsParsingReporter::HandleRobotsStart() {
   last_line_seen_ = 0;
   valid_directives_ = 0;
   unused_directives_ = 0;
+  unused_directives_string_ = "";
 }
 void RobotsParsingReporter::HandleRobotsEnd() {}
 void RobotsParsingReporter::HandleUserAgent(int line_num,
@@ -75,6 +78,7 @@ void RobotsParsingReporter::HandleUnknownAction(int line_num,
           ? RobotsParsedLine::kUnused
           : RobotsParsedLine::kUnknown;
   unused_directives_++;
+  unused_directives_string_  +=  "{\"line_number\":" + std::to_string(line_num) + ",\"action\": \"" + std::string(action) + "\",\"value\": \"" + std::string(line_value) + "\"}" + ",";
   Digest(line_num, rtn);
 }
 

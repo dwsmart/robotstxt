@@ -58,5 +58,7 @@ cc_binary(
     srcs = ["robots_main.cc"],
     deps = [
         ":robots",
+        ":reporting_robots",
+        "@abseil-cpp//absl/strings",
     ],
 )

@@ -41,6 +41,7 @@
 #include <iostream>
 
 #include "robots.h"
+#include "reporting_robots.h"
 
 bool LoadFile(const std::string& filename, std::string* result) {
   std::ifstream file(filename, std::ios::in | std::ios::binary | std::ios::ate);
@@ -55,6 +56,23 @@ bool LoadFile(const std::string& filename, std::string* result) {
     return true;
   }
   return false;
+}
+
+ void testRobotsVal(std::string robots_content) {
+ googlebot::RobotsParsingReporter report;
+  googlebot::ParseRobotsTxt(robots_content, &report);
+  std::string errorlines = report.unused_directives_string();
+  if (!errorlines.empty()) {
+    errorlines.pop_back();
+  }
+
+  std::cout << "\"valid_directives\": " << report.valid_directives() << "," << std::endl;
+  std::cout << "\"unused_directives_count\": " << report.unused_directives() << "," << std::endl;
+  if (!errorlines.empty()) {
+    std::cout << "\"unused_directives\": [" << errorlines << "]," << std::endl;
+  }
+  std::cout << "\"last_line_seen\": " << report.last_line_seen() << "," << std::endl;
+
 }
 
 void ShowHelp(int argc, char** argv) {
@@ -94,20 +112,27 @@ int main(int argc, char** argv) {
   std::string user_agent = argv[2];
   std::vector<std::string> user_agents(1, user_agent);
   googlebot::RobotsMatcher matcher;
+  googlebot::RobotsParsingReporter reporter;
+
+  
   std::string url = argv[3];
   bool allowed = matcher.AllowedByRobots(robots_content, &user_agents, url);
+  bool agentspec = matcher.disallow_ignore_global();
+
+
+
 
   std::cout << "{" << std::endl;
+   testRobotsVal(robots_content);
   std::cout << "\"allowed\": " << (allowed ? "true" : "false")  << ",\n"
             << "\"line\": " << matcher.matching_line() << ",\n"
             << "\"agent_specific\": " << (agentspec ? "true" : "false") << std::endl;
+ 
             
   if (robots_content.empty()) {
     std::cout << ",\n\"notice\": \"robots file is empty so all user-agents are allowed\""
               << std::endl;
   }
   std::cout << "}" << std::endl;
-
-
   return allowed ? 0 : 1;
 }

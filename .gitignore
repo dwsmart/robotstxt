@@ -1,2 +1,9 @@
 c-build/*
 .vscode/settings.json
+MODULE.bazel.lock
+bazel-bin/*
+bazel-out/*
+bazel-testlogs/*
+bazel-*
+robots.txt
+.bazelrc

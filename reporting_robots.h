@@ -2,6 +2,7 @@
 #define THIRD_PARTY_ROBOTSTXT_REPORTING_ROBOTS_H_
 
 #include <vector>
+#include <string>
 
 #include "absl/container/btree_map.h"
 #include "absl/strings/string_view.h"
@@ -51,6 +52,7 @@ class RobotsParsingReporter : public googlebot::RobotsParseHandler {
   int last_line_seen() const { return last_line_seen_; }
   int valid_directives() const { return valid_directives_; }
   int unused_directives() const { return unused_directives_; }
+  std::string unused_directives_string() const { return unused_directives_string_; }
   std::vector<RobotsParsedLine> parse_results() const {
     std::vector<RobotsParsedLine> vec;
     for (const auto& entry : robots_parse_results_) {
@@ -67,6 +69,7 @@ class RobotsParsingReporter : public googlebot::RobotsParseHandler {
   int last_line_seen_ = 0;
   int valid_directives_ = 0;
   int unused_directives_ = 0;
+  std::string unused_directives_string_ = "";
 };
 }  // namespace googlebot
 #endif  // THIRD_PARTY_ROBOTSTXT_REPORTING_ROBOTS_H_

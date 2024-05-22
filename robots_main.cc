@@ -97,12 +97,17 @@ int main(int argc, char** argv) {
   std::string url = argv[3];
   bool allowed = matcher.AllowedByRobots(robots_content, &user_agents, url);
 
-  std::cout << "user-agent '" << user_agent << "' with URI '" << argv[3]
-            << "': " << (allowed ? "ALLOWED" : "DISALLOWED") << std::endl;
+  std::cout << "{" << std::endl;
+  std::cout << "\"allowed\": " << (allowed ? "true" : "false")  << ",\n"
+            << "\"line\": " << matcher.matching_line() << ",\n"
+            << "\"agent_specific\": " << (agentspec ? "true" : "false") << std::endl;
+            
   if (robots_content.empty()) {
-    std::cout << "notice: robots file is empty so all user-agents are allowed"
+    std::cout << ",\n\"notice\": \"robots file is empty so all user-agents are allowed\""
               << std::endl;
   }
+  std::cout << "}" << std::endl;
+
 
   return allowed ? 0 : 1;
 }

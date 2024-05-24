@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+
 #include "absl/strings/ascii.h"
 #include "absl/strings/string_view.h"
 
@@ -19,6 +20,17 @@ namespace googlebot {
 // (for example, "unicorn" from "unicorn: /value")
 static const std::vector<std::string> kUnsupportedTags = {
     "clean-param", "crawl-delay", "host", "noarchive", "noindex", "nofollow"};
+
+// handle quotes in the string inplace by adding a backslash before the quote so that it can be used in json
+void handleQuotes(std::string& str) {
+  std::string::size_type n = 0;
+  while ((n = str.find("\"", n)) != std::string::npos) {
+    str.replace(n, 1, "\\\"");
+    n += 2;
+  }
+}
+
+
 
 void RobotsParsingReporter::Digest(int line_num,
                                    RobotsParsedLine::RobotsTagName parsed_tag) {
@@ -78,7 +90,11 @@ void RobotsParsingReporter::HandleUnknownAction(int line_num,
           ? RobotsParsedLine::kUnused
           : RobotsParsedLine::kUnknown;
   unused_directives_++;
-  unused_directives_string_  +=  "{\"line_number\":" + std::to_string(line_num) + ",\"action\": \"" + std::string(action) + "\",\"value\": \"" + std::string(line_value) + "\"}" + ",";
+  std::string action_str = std::string(action);
+  handleQuotes(action_str);
+  std::string line_value_str = std::string(line_value);
+  handleQuotes(line_value_str);
+  unused_directives_string_  +=  "{\"line_number\":" + std::to_string(line_num) + ",\"action\": \"" + action_str + "\",\"value\": \"" + line_value_str + "\"}" + ",";
   Digest(line_num, rtn);
 }
 

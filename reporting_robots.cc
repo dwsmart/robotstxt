@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 
 #include "absl/strings/ascii.h"
@@ -21,13 +23,28 @@ namespace googlebot {
 static const std::vector<std::string> kUnsupportedTags = {
     "clean-param", "crawl-delay", "host", "noarchive", "noindex", "nofollow"};
 
-// handle quotes in the string inplace by adding a backslash before the quote so that it can be used in json
-void handleQuotes(std::string& str) {
-  std::string::size_type n = 0;
-  while ((n = str.find("\"", n)) != std::string::npos) {
-    str.replace(n, 1, "\\\"");
-    n += 2;
-  }
+// sanitize the string so that it can be used in json
+std::string escape_json(const std::string &s) {
+     std::ostringstream o;
+    for (auto c = s.cbegin(); c != s.cend(); c++) {
+        switch (*c) {
+        case '"': o << "\\\""; break;
+        case '\\': o << "\\\\"; break;
+        case '\b': o << "\\b"; break;
+        case '\f': o << "\\f"; break;
+        case '\n': o << "\\n"; break;
+        case '\r': o << "\\r"; break;
+        case '\t': o << "\\t"; break;
+        default:
+            if ('\x00' <= *c && *c <= '\x1f') {
+                o << "\\u"
+                  << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(*c);
+            } else {
+                o << *c;
+            }
+        }
+    }
+    return o.str();
 }
 
 
@@ -91,10 +108,10 @@ void RobotsParsingReporter::HandleUnknownAction(int line_num,
           : RobotsParsedLine::kUnknown;
   unused_directives_++;
   std::string action_str = std::string(action);
-  handleQuotes(action_str);
+  std::string action_str_escaped = escape_json(action_str);
   std::string line_value_str = std::string(line_value);
-  handleQuotes(line_value_str);
-  unused_directives_string_  +=  "{\"line_number\":" + std::to_string(line_num) + ",\"action\": \"" + action_str + "\",\"value\": \"" + line_value_str + "\"}" + ",";
+  std::string line_value_str_escaped = escape_json(line_value_str);
+  unused_directives_string_  +=  "{\"line_number\":" + std::to_string(line_num) + ",\"action\": \"" + action_str_escaped + "\",\"value\": \"" + line_value_str_escaped + "\"}" + ",";
   Digest(line_num, rtn);
 }
 

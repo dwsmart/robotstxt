@@ -118,6 +118,7 @@ int main(int argc, char** argv) {
   std::string url = argv[3];
   bool allowed = matcher.AllowedByRobots(robots_content, &user_agents, url);
   bool agentspec = matcher.disallow_ignore_global();
+  bool seen = matcher.ever_seen_specific_agent();
 
 
 
@@ -126,7 +127,8 @@ int main(int argc, char** argv) {
    testRobotsVal(robots_content);
   std::cout << "\"allowed\": " << (allowed ? "true" : "false")  << ",\n"
             << "\"line\": " << matcher.matching_line() << ",\n"
-            << "\"agent_specific\": " << (agentspec ? "true" : "false") << std::endl;
+            << "\"agent_specific\": " << (agentspec ? "true" : "false") << ",\n"
+            << "\"seen_agent\": " << (seen ? "true" : "false") << std::endl;
  
             
   if (robots_content.empty()) {
